@@ -21,3 +21,4 @@ firebase_creds.json
 
 # Binary Files
 *.DS_STORE
+/.idea/

@@ -65,7 +65,10 @@ func main() {
 		log.Fatalf("failed to create breezsdk notifier %v", err)
 	}
 	channel := channel.NewHttpCallbackChannel(config.ExternalURL)
+
+	log.Printf("Initialization successful. Starting web server on %s", config.HTTPConfig.Address)
+
 	if err = http.Run(notifier, channel, &config.HTTPConfig); err != nil {
-		log.Printf("web server has exited with error")
+		log.Printf("web server has exited with error: %v", err)
 	}
 }
