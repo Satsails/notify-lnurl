@@ -58,14 +58,11 @@ func createPush(notification *notify.Notification) (*messaging.Message, error) {
 		},
 		APNS: &messaging.APNSConfig{
 			Headers: map[string]string{
-				"apns-push-type": "alert",
-				"apns-priority":  "10",
+				"apns-push-type": "background",
+				"apns-priority":  "5",
 			},
 			Payload: &messaging.APNSPayload{
 				Aps: &messaging.Aps{
-					Alert: &messaging.ApsAlert{
-						Title: notification.DisplayMessage,
-					},
 					ContentAvailable: true,
 				},
 			},
