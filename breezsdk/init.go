@@ -40,7 +40,6 @@ func createMessageFactory() services.FCMMessageBuilder {
 
 func createPush(notification *notify.Notification) (*messaging.Message, error) {
 	data := make(map[string]string)
-
 	data["notification_type"] = notification.Template
 	if notification.AppData != nil {
 		data["app_data"] = *notification.AppData
@@ -59,15 +58,15 @@ func createPush(notification *notify.Notification) (*messaging.Message, error) {
 		},
 		APNS: &messaging.APNSConfig{
 			Headers: map[string]string{
-				"apns-priority": "10",
+				"apns-push-type": "alert",
+				"apns-priority":  "10",
 			},
 			Payload: &messaging.APNSPayload{
 				Aps: &messaging.Aps{
 					Alert: &messaging.ApsAlert{
 						Title: notification.DisplayMessage,
 					},
-					ContentAvailable: false,
-					MutableContent:   true,
+					ContentAvailable: true,
 				},
 			},
 		},
