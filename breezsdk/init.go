@@ -3,6 +3,7 @@ package breezsdk
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"firebase.google.com/go/messaging"
 	"github.com/breez/notify/config"
@@ -31,7 +32,10 @@ func createMessageFactory() services.FCMMessageBuilder {
 			notify.NOTIFICATION_SWAP_UPDATED,
 			notify.NOTIFICATION_INVOICE_REQUEST:
 
-			return createPush(notification)
+			if os.Getenv("IOS_HIGH_PRIORITY") == "true" {
+				return createPush(notification)
+			}
+			return createBackgroundPush(notification)
 		}
 
 		return nil, nil
@@ -68,6 +72,38 @@ func createPush(notification *notify.Notification) (*messaging.Message, error) {
 					},
 					ContentAvailable: false,
 					MutableContent:   true,
+				},
+			},
+		},
+	}, nil
+}
+
+func createBackgroundPush(notification *notify.Notification) (*messaging.Message, error) {
+	data := make(map[string]string)
+	data["notification_type"] = notification.Template
+	if notification.AppData != nil {
+		data["app_data"] = *notification.AppData
+	}
+	payload, err := json.Marshal(notification.Data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal notification data %v", err)
+	}
+	data["notification_payload"] = string(payload)
+
+	return &messaging.Message{
+		Token: notification.TargetIdentifier,
+		Data:  data,
+		Android: &messaging.AndroidConfig{
+			Priority: "high",
+		},
+		APNS: &messaging.APNSConfig{
+			Headers: map[string]string{
+				"apns-push-type": "background",
+				"apns-priority":  "5",
+			},
+			Payload: &messaging.APNSPayload{
+				Aps: &messaging.Aps{
+					ContentAvailable: true,
 				},
 			},
 		},
