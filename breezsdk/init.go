@@ -34,17 +34,17 @@ func createMessageFactory() services.FCMMessageBuilder {
 
 			if os.Getenv("IOS_HIGH_PRIORITY") == "true" {
 				return createPush(notification)
+			} else {
+				return createbackgroundPush(notification)
 			}
-			return createBackgroundPush(notification)
 		}
-
 		return nil, nil
 	}
 }
 
+// createPush builds a high-priority, user-visible push notification.
 func createPush(notification *notify.Notification) (*messaging.Message, error) {
 	data := make(map[string]string)
-
 	data["notification_type"] = notification.Template
 	if notification.AppData != nil {
 		data["app_data"] = *notification.AppData
@@ -57,7 +57,13 @@ func createPush(notification *notify.Notification) (*messaging.Message, error) {
 
 	return &messaging.Message{
 		Token: notification.TargetIdentifier,
-		Data:  data,
+
+		Notification: &messaging.Notification{
+			Title: "Satsails Wallet",
+			Body:  notification.DisplayMessage,
+		},
+
+		Data: data,
 		Android: &messaging.AndroidConfig{
 			Priority: "high",
 		},
@@ -67,18 +73,14 @@ func createPush(notification *notify.Notification) (*messaging.Message, error) {
 			},
 			Payload: &messaging.APNSPayload{
 				Aps: &messaging.Aps{
-					Alert: &messaging.ApsAlert{
-						Title: notification.DisplayMessage,
-					},
-					ContentAvailable: false,
-					MutableContent:   true,
+					MutableContent: true,
 				},
 			},
 		},
 	}, nil
 }
 
-func createBackgroundPush(notification *notify.Notification) (*messaging.Message, error) {
+func createbackgroundPush(notification *notify.Notification) (*messaging.Message, error) {
 	data := make(map[string]string)
 	data["notification_type"] = notification.Template
 	if notification.AppData != nil {
