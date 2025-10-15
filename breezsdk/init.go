@@ -71,7 +71,7 @@ func createPush(notification *notify.Notification) (*messaging.Message, error) {
 					Alert: &messaging.ApsAlert{
 						Title: notification.DisplayMessage,
 					},
-					ContentAvailable: true,
+					ContentAvailable: false,
 					MutableContent:   true,
 				},
 			},
